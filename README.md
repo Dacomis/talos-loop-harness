@@ -1,35 +1,34 @@
 # talos-loop-harness
 
-Talos, the bronze automaton, walked the same circuit of Crete three times a
-day, unattended, until he was stopped.
+Talos, the bronze automaton, walked the same circuit of Crete three times a day
+without supervision. This runs a plan the same way.
 
-A minimal, **strictly sequential** loop for working a plan to completion
-unattended. One plan item at a time, implemented by a subagent, attacked by an
-independent red cell, ruled on by an independent judge, then committed by the
-main session.
+A sequential loop for working a plan to completion overnight. One item at a
+time, implemented by a subagent, attacked by an independent red cell, ruled on
+by an independent judge, then committed by the main session.
 
-The previous version of this harness ran plan items in parallel over git
-worktrees and needed ~28k lines of JavaScript to make that safe. It still
-failed: agents errored, and items reported "implemented all at once"
-implemented nothing. v2 abandons parallelism. What is left is markdown.
+The previous version ran plan items in parallel over git worktrees and needed
+~28k lines of JavaScript to make that safe. It still failed: agents errored,
+and items that reported "implemented all at once" implemented nothing. v2 drops
+parallelism, and with it every line of JavaScript.
 
-## Philosophy
+## Design
 
 - **Sequential.** One item at a time, clean tree between items. No worktrees,
   no lanes, no merge gate, no requeue.
 - **Adversarially verified.** The implementer never grades itself. The red cell
-  sees only the item text and the diff — never the implementer's account of it.
-  The judge always runs, even when the red cell passes.
+  sees the item text and the diff, never the implementer's account of it. The
+  judge runs on every item, including the ones the red cell passed.
 - **The main session drives.** All plan edits and all commits are made by the
   driving session, never by a subagent. Subagents return text; the driver acts.
 - **State is on disk, not in context.** `plan.md` + `decisions.md` + git
-  history are the entire state. `/clear` and re-invoke is a free resume.
+  history are the entire state, so `/clear` and re-invoke resumes for free.
 
 ## Files
 
 | Path | What it is |
 |---|---|
-| `skills/talos/SKILL.md` | The driver procedure. This is the harness. |
+| `skills/talos/SKILL.md` | The driver procedure, and the bulk of the harness. |
 | `skills/talos/FORMAT.md` | `plan.md` / `decisions.md` format spec. |
 | `skills/talos/prompts/implementer.md` | Implementer subagent prompt. |
 | `skills/talos/prompts/red-cell.md` | Red-cell subagent prompt. |
@@ -44,17 +43,17 @@ cp -r skills/talos      <repo>/.claude/skills/talos
 cp -r skills/talos-mini <repo>/.claude/skills/talos-mini
 ```
 
-Then, in that repo, write a `plan.md` (see `skills/talos/FORMAT.md`) — normally
-in an ordinary session with a strong model, since a badly written plan is the
-one failure the loop cannot recover from. Commit it, and run `/talos`.
+Then write a `plan.md` in that repo, in the format given in
+`skills/talos/FORMAT.md`. Author it in an ordinary session with a strong model:
+a badly written plan is the one failure the loop cannot recover from. Commit
+it, then run `/talos`.
 
-`decisions.md` is created by the loop on first need. For ad-hoc task lists
-agreed in conversation, run `/talos-mini` instead — no plan authoring session
-required.
+`decisions.md` is created by the loop on first need. For task lists agreed in
+conversation, run `/talos-mini` and skip the plan-authoring session.
 
 ## Reading the output in the morning
 
-- `plan.md` — `[x]` done, `[ ]` not reached, `[!]` blocked.
-- `decisions.md` — every judge override, plan edit, and block, with reasoning.
-- `git log --oneline` — one `feat:`/`fix:` commit per item, each optionally
+- `plan.md`: `[x]` done, `[ ]` not reached, `[!]` blocked.
+- `decisions.md`: every judge override, plan edit, and block, with reasoning.
+- `git log --oneline`: one `feat:` or `fix:` commit per item, each optionally
   followed by its `refactor:` simplification commit.
