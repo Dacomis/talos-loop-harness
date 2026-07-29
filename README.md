@@ -7,11 +7,6 @@ A sequential loop for working a plan to completion overnight. One item at a
 time, implemented by a subagent, attacked by an independent red cell, ruled on
 by an independent judge, then committed by the main session.
 
-The previous version ran plan items in parallel over git worktrees and needed
-~28k lines of JavaScript to make that safe. It still failed: agents errored,
-and items that reported "implemented all at once" implemented nothing. v2 drops
-parallelism, and with it every line of JavaScript.
-
 ## Design
 
 - **Sequential.** One item at a time, clean tree between items. No worktrees,
