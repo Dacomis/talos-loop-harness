@@ -1,6 +1,6 @@
 # Judge prompt template
 
-Spawn with `model: fable`. Fill every `<...>`. Runs on every item, whatever the
+Spawn with the checker pin. Fill every `<...>`. Runs on every item, whatever the
 red cell said.
 
 When the implementer made no changes and proposed a plan change instead, the

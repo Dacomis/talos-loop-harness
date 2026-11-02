@@ -42,7 +42,8 @@ already said "just do it". On OK, commit it:
 
 ## 3. Run
 
-Invoke `/talos` with the plan path `mini-plan.md`. The per-item procedure is
+Invoke `/talos` with the plan path `mini-plan.md`, plus any pins passed to
+`/talos-mini` (e.g. `/talos-mini fable-high opus-medium`). The per-item procedure is
 identical and unmodified; decisions still append to `decisions.md`.
 
 ## Resuming and reuse

@@ -1,6 +1,6 @@
 # Red-cell prompt template
 
-Spawn with `model: fable` for the main verification pass, `model: opus` for the
+Spawn with the checker pin, for both the main verification pass and the
 post-simplification re-verify. Fill every `<...>`.
 
 **Never** include the implementer's SUMMARY, its reasoning, or any claim it

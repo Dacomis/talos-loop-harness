@@ -1,6 +1,6 @@
 # Implementer prompt template
 
-Spawn with `model: opus`. Fill every `<...>`. Include the FEEDBACK section only
+Spawn with the implementer pin. Fill every `<...>`. Include the FEEDBACK section only
 on a retry.
 
 ---

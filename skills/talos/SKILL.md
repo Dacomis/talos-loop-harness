@@ -19,13 +19,23 @@ rules govern everything below:
 4. **Fail closed.** A reply you cannot parse a `VERDICT:` line out of is a
    failure, and it consumes an attempt.
 
-**Plan path.** Default `plan.md`. If invoked with an argument, that argument is
-the plan path (`/talos-mini` passes `mini-plan.md`). `decisions.md` is always
-`decisions.md`. Everything below says "the plan" for the resolved path.
+**Arguments.** `/talos [plan-path] [implementer-pin] [checker-pin]`, any order.
+A pin is `<model>-<effort>` (e.g. `opus-medium`, `fable-high`); every other
+argument is the plan path.
+
+- **Plan path.** Default `plan.md` (`/talos-mini` passes `mini-plan.md`).
+  `decisions.md` is always `decisions.md`. Everything below says "the plan"
+  for the resolved path.
+- **Implementer pin.** The first pin. Default `opus-medium`.
+- **Checker pin.** The second pin, used for the red cell and the judge on every
+  pass. Default `opus-medium`.
+
+Spawn with `model: <model>`, `effort: <effort>` from the pin. Echo the resolved
+pins once at start of session.
 
 **Spawning subagents.** Use the Agent tool with `subagent_type:
 "general-purpose"`, `run_in_background: false` (you need the result before you
-can continue), and the `model:` pin given per role. The prompt bodies are in
+can continue), and the pin for the role. The prompt bodies are in
 `prompts/implementer.md`, `prompts/red-cell.md`, `prompts/judge.md` — read the
 one you need, fill its placeholders, and pass the filled text as the prompt.
 Every subagent gets a *fresh* context: never carry one role's transcript into
@@ -69,7 +79,7 @@ dirty tree.
 The **first** `[ ]` line in the plan, in file order. Note its number `N` and
 its full text including any indented detail block.
 
-### 2. Implement — `model: opus`
+### 2. Implement — implementer pin
 
 Fill `prompts/implementer.md` and spawn. It gets: the item, the whole plan for
 context, the test command, and — on a retry — the previous red-cell findings
@@ -89,7 +99,7 @@ empty):
 - **without** one — go to step 5's FIX-REQUIRED path with "no changes were
   made" as the instruction. This consumes an attempt.
 
-### 3. Red cell — `model: fable`
+### 3. Red cell — checker pin
 
 Run `git diff` (plus `git status --porcelain` to catch new files; `git add -N .`
 first so untracked files appear in the diff). Fill `prompts/red-cell.md` with
@@ -98,7 +108,7 @@ the item text and the diff **inline**. Spawn a fresh agent.
 Parse `VERDICT: PASS|FAIL` and `FINDINGS:`. Unparseable → treat as FAIL with
 "red cell returned no parseable verdict" as the sole finding.
 
-### 4. Judge — `model: fable`, always
+### 4. Judge — checker pin, always
 
 Runs whether the red cell passed or failed. Fill `prompts/judge.md` with: the
 item, the same diff, the red cell's verdict and findings, and — if the
@@ -158,10 +168,10 @@ changed nothing, skip to step 9.
 ### 7. Light re-verify — only if simplify changed something
 
 1. Run the test command. Failure → discard (step 7.3).
-2. One red-cell pass, **`model: opus`**, scoped to the simplification diff only
+2. One red-cell pass, **checker pin**, scoped to the simplification diff only
    (`git diff` against the item commit), with the item text as the contract.
 3. Tests pass **and** red cell PASS → step 8. Red cell FAIL → spawn the judge
-   (`model: fable`) on the simplification diff. APPROVE → step 8. Anything else
+   (checker pin) on the simplification diff. APPROVE → step 8. Anything else
    → `git checkout . && git clean -fd`.
 
 **Never retry a simplification.** A discarded simplification is not a failure
